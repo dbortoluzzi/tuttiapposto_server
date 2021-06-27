@@ -17,13 +17,13 @@ public class BookingController {
     BookingService bookingService;
 
     @GetMapping("/api/bookings")
-    public ResponseEntity<List<Booking>> getAllStudents() {
+    public ResponseEntity<List<Booking>> getAllBookings() {
         List<Booking> bookings = bookingService.getAllBookings();
         return new ResponseEntity<>(bookings, HttpStatus.OK);
     }
 
     @GetMapping("/api/bookings/{id}")
-    public ResponseEntity<Booking> getStudentById(@PathVariable("id") String id) throws InterruptedException, ExecutionException {
+    public ResponseEntity<Booking> getBookingById(@PathVariable("id") String id) throws InterruptedException, ExecutionException {
 
         Booking booking = bookingService.getBookingById(id);
 
@@ -35,17 +35,17 @@ public class BookingController {
     }
 
     @PostMapping("/api/bookings")
-    public ResponseEntity<String> saveStudent(@RequestBody Booking booking) throws InterruptedException, ExecutionException {
+    public ResponseEntity<String> saveBooking(@RequestBody Booking booking) throws InterruptedException, ExecutionException {
         return new ResponseEntity<>(bookingService.saveBooking(booking), HttpStatus.CREATED);
     }
 
     @PostMapping("/api/bookings/{id}")
-    public ResponseEntity<Boolean> updateStudent(@PathVariable("id") String id, @RequestBody Booking booking) throws InterruptedException, ExecutionException {
+    public ResponseEntity<Boolean> updateBooking(@PathVariable("id") String id, @RequestBody Booking booking) throws InterruptedException, ExecutionException {
         return new ResponseEntity<>(bookingService.updateBooking(id, booking), HttpStatus.OK);
     }
 
     @DeleteMapping("/api/bookings/{id}")
-    public ResponseEntity<Boolean> deleteStudent(@PathVariable("id") String id) {
+    public ResponseEntity<Boolean> deleteBooking(@PathVariable("id") String id) {
         return new ResponseEntity<>(bookingService.deleteBooking(id), HttpStatus.OK);
     }
 }
