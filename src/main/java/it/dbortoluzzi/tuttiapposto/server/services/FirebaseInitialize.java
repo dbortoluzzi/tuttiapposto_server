@@ -21,8 +21,9 @@ public class FirebaseInitialize {
     public void initialize() {
 
         try {
-            InputStream serviceAccount =
-                    new FileInputStream(serviceAccountPath);
+
+            ClassLoader classLoader = getClass().getClassLoader();
+            InputStream serviceAccount = classLoader.getResourceAsStream(serviceAccountPath);
 
             GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccount);
             FirebaseOptions options = new FirebaseOptions.Builder()
