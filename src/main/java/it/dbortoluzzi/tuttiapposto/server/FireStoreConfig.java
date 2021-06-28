@@ -19,7 +19,7 @@ import java.nio.charset.StandardCharsets;
 public class FireStoreConfig {
 
 	@Bean
-	public Firestore getFireStore(@Value("${firebase.serviceAccount.path}") String credentialPath, @Value("${firebase.serviceAccount.json}") String credentialsJson) throws IOException {
+	public Firestore getFireStore(@Value("${firebase.serviceAccount.json}") String credentialsJson) throws IOException {
 
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(credentialsJson.getBytes(StandardCharsets.UTF_8));
 		GoogleCredentials credentials = GoogleCredentials.fromStream(inputStream);
