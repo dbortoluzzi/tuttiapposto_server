@@ -10,7 +10,7 @@ import lombok.*;
 public class Table {
 
     @DocumentId
-    private String id;
+    private String uID;
     @NonNull
     private String companyId;
     @NonNull

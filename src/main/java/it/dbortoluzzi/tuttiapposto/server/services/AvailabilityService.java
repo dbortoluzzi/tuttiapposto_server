@@ -1,18 +1,13 @@
 package it.dbortoluzzi.tuttiapposto.server.services;
 
-import com.google.cloud.Timestamp;
-import com.google.cloud.firestore.FieldPath;
-import com.google.cloud.firestore.Firestore;
 import it.dbortoluzzi.tuttiapposto.server.models.*;
 import it.dbortoluzzi.tuttiapposto.server.repositories.*;
 import it.dbortoluzzi.tuttiapposto.server.utils.CommonQueriesBuilder;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -23,9 +18,6 @@ import static java.util.stream.Collectors.groupingBy;
 
 @Service
 public class AvailabilityService {
-    // TODO: remove
-    private static SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.ITALIAN);
-
     @Autowired
     BookingRepository bookingRepository;
 
@@ -91,7 +83,7 @@ public class AvailabilityService {
                     .active(true)
                 .buildQuery()))
                 .stream()
-                .collect(Collectors.toMap(Table::getId, Function.identity()));
+                .collect(Collectors.toMap(Table::getUID, Function.identity()));
 
         Map<String, List<Booking>> bookingsByTables = existingBookings.stream().collect(groupingBy(Booking::getTableId));
 

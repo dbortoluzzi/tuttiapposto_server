@@ -10,7 +10,7 @@ import lombok.*;
 public class Company {
 
     @DocumentId
-    private String id;
+    private String uID;
     private String vatNumber;
     @NonNull
     private String denomination;

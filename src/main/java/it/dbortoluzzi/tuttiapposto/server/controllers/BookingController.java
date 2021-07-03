@@ -43,7 +43,7 @@ public class BookingController {
 
     @PostMapping("/api/bookings/{id}")
     public ResponseEntity<String> updateBooking(@PathVariable("id") String id, @RequestBody Booking booking) {
-        booking.setId(id);
+        booking.setUID(id);
         Optional<String> update = bookingRepository.save(booking);
         return update.map(value -> new ResponseEntity<>(value, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
     }

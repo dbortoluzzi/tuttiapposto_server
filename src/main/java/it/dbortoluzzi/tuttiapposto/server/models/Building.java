@@ -10,7 +10,7 @@ import lombok.*;
 public class Building {
 
     @DocumentId
-    private String id;
+    private String uID;
     @NonNull
     private String companyId;
     private Boolean active;
