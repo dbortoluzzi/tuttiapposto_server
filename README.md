@@ -9,7 +9,11 @@ Before to start:
 ## To run in prod mode
 `mvn spring-boot:run -Dspring-boot.run.profiles=prod`
 
+## To stop dyno in Heroku
+`heroku ps:restart`
+
 ## Deploy 
 
 ### Heroku
 `git push heroku master`
+

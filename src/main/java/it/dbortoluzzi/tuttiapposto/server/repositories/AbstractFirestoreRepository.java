@@ -6,6 +6,7 @@ import com.google.cloud.firestore.annotation.DocumentId;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.Nullable;
 
+import javax.print.Doc;
 import java.lang.reflect.ParameterizedType;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -13,9 +14,9 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public abstract class AbstractFirestoreRepository<T> {
-    private final CollectionReference collectionReference;
-    private final String collectionName;
-    private final Class<T> parameterizedType;
+    public final CollectionReference collectionReference;
+    protected final String collectionName;
+    protected final Class<T> parameterizedType;
 
     protected AbstractFirestoreRepository(Firestore firestore, String collection) {
         this.collectionReference = firestore.collection(collection);
@@ -53,7 +54,47 @@ public abstract class AbstractFirestoreRepository<T> {
         return false;
     }
 
-    public List<T> retrieveAll() {
+    public List<T> findByQuery(Query query) throws ExecutionException, InterruptedException {
+        ApiFuture<QuerySnapshot> querySnapshotApiFuture = query.get();
+
+        try {
+            List<QueryDocumentSnapshot> queryDocumentSnapshots = querySnapshotApiFuture.get().getDocuments();
+
+            return queryDocumentSnapshots.stream()
+                    .map(queryDocumentSnapshot -> queryDocumentSnapshot.toObject(parameterizedType))
+                    .collect(Collectors.toList());
+
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("Exception occurred while retrieving filtered document for {} with filters {}", collectionName, query);
+            throw e;
+        }
+    }
+
+    public List<T> findByQueryPaginated(Query query, Optional<String> lastDocumentIdOpt) {
+        if (lastDocumentIdOpt.isPresent()) {
+            Optional<DocumentSnapshot> lastDocumentSnapshot = getDocSnapshot(lastDocumentIdOpt.get());
+            if (lastDocumentSnapshot.isPresent()) {
+                query = query.startAfter(lastDocumentSnapshot.get());
+            }
+        }
+        ApiFuture<QuerySnapshot> querySnapshotApiFuture = query.get();
+
+        try {
+
+            List<QueryDocumentSnapshot> queryDocumentSnapshots = querySnapshotApiFuture.get().getDocuments();
+
+            return queryDocumentSnapshots.stream()
+                    .map(queryDocumentSnapshot -> queryDocumentSnapshot.toObject(parameterizedType))
+                    .collect(Collectors.toList());
+
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("Exception occurred while retrieving filtered document for {}", collectionName);
+        }
+        return Collections.<T>emptyList();
+
+    }
+
+    public List<T> findAll() throws ExecutionException, InterruptedException {
         ApiFuture<QuerySnapshot> querySnapshotApiFuture = collectionReference.get();
 
         try {
@@ -65,11 +106,30 @@ public abstract class AbstractFirestoreRepository<T> {
 
         } catch (InterruptedException | ExecutionException e) {
             log.error("Exception occurred while retrieving all document for {}", collectionName);
+            throw e;
         }
-        return Collections.<T>emptyList();
 
     }
 
+
+    private Optional<DocumentSnapshot> getDocSnapshot(String documentId) {
+        DocumentReference documentReference = collectionReference.document(documentId);
+        ApiFuture<DocumentSnapshot> documentSnapshotApiFuture = documentReference.get();
+
+        try {
+            DocumentSnapshot documentSnapshot = documentSnapshotApiFuture.get();
+
+            if (documentSnapshot.exists()) {
+                return Optional.ofNullable(documentSnapshot);
+            }
+
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("Exception occurred retrieving: {} {}, {}", collectionName, documentId, e.getMessage());
+        }
+
+        return Optional.empty();
+
+    }
 
     public Optional<T> get(String documentId) {
         DocumentReference documentReference = collectionReference.document(documentId);

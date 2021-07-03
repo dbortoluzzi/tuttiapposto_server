@@ -18,8 +18,13 @@ public class BookingController {
 
     @GetMapping("/api/bookings")
     public ResponseEntity<List<Booking>> getAllBookings() {
-        List<Booking> bookings = bookingRepository.retrieveAll();
-        return new ResponseEntity<>(bookings, HttpStatus.OK);
+        List<Booking> bookings = null;
+        try {
+            bookings = bookingRepository.findAll();
+            return new ResponseEntity<>(bookings, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/api/bookings/{id}")

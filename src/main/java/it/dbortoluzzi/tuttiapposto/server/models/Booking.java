@@ -1,24 +1,57 @@
 package it.dbortoluzzi.tuttiapposto.server.models;
 
 import com.google.cloud.firestore.annotation.DocumentId;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.apache.commons.lang3.time.DateUtils;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class Booking {
 
     @DocumentId
     private String id;
+    @NonNull
     private String userUid;
-    private String companyUid;
+    @NonNull
+    private String companyId;
+    @NonNull
+    private String buildingId;
+    @NonNull
+    private String roomId;
+    @NonNull
+    private String tableId;
+    @NonNull
+    private Date startDate;
+    @NonNull
+    private Date endDate;
+    private List<Date> days;
 
-    public Booking(String id, String userUid, String companyUid) {
+    public Booking(String id, @NonNull String userUid, @NonNull String companyId, @NonNull String buildingId, @NonNull String roomId, @NonNull String tableId, @NonNull Date startDate, @NonNull Date endDate) {
         this.id = id;
         this.userUid = userUid;
-        this.companyUid = companyUid;
+        this.companyId = companyId;
+        this.buildingId = buildingId;
+        this.roomId = roomId;
+        this.tableId = tableId;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        rebuildDates();
+    }
+
+    public void rebuildDates() {
+        List<Date> daysFound = new ArrayList<>();
+        Date checkDate = DateUtils.truncate(startDate, Calendar.DATE);
+        while (checkDate.before(endDate)) {
+            daysFound.add(checkDate);
+            checkDate = DateUtils.addDays(checkDate, 1);
+        }
+        this.days = daysFound;
     }
 }
