@@ -18,7 +18,7 @@ public class Booking {
     @DocumentId
     private String id;
     @NonNull
-    private String userUid;
+    private String userId;
     @NonNull
     private String companyId;
     @NonNull
@@ -33,9 +33,9 @@ public class Booking {
     private Date endDate;
     private List<Date> days;
 
-    public Booking(String id, @NonNull String userUid, @NonNull String companyId, @NonNull String buildingId, @NonNull String roomId, @NonNull String tableId, @NonNull Date startDate, @NonNull Date endDate) {
+    public Booking(String id, @NonNull String userId, @NonNull String companyId, @NonNull String buildingId, @NonNull String roomId, @NonNull String tableId, @NonNull Date startDate, @NonNull Date endDate) {
         this.id = id;
-        this.userUid = userUid;
+        this.userId = userId;
         this.companyId = companyId;
         this.buildingId = buildingId;
         this.roomId = roomId;
