@@ -20,5 +20,6 @@ public class Table {
     private Boolean active;
     @NonNull
     private String name;
+    @NonNull
     private Integer maxCapacity;
 }

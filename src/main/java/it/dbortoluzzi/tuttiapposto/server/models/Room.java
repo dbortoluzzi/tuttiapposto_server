@@ -19,5 +19,4 @@ public class Room {
     @NonNull
     private String name;
     private String description;
-    private Integer maxCapacity;
 }
