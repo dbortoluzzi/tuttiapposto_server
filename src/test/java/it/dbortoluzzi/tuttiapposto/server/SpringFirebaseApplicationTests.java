@@ -1,5 +1,6 @@
 package it.dbortoluzzi.tuttiapposto.server;
 
+import it.dbortoluzzi.tuttiapposto.server.controllers.dto.AvailabilityResponseDto;
 import it.dbortoluzzi.tuttiapposto.server.models.Booking;
 import it.dbortoluzzi.tuttiapposto.server.models.Table;
 import it.dbortoluzzi.tuttiapposto.server.repositories.BookingRepository;
@@ -67,11 +68,11 @@ class SpringFirebaseApplicationTests {
 
     @Test
     void getAvailability() throws ExecutionException, InterruptedException, ParseException {
-        Date startDate = formatter.parse("2021-07-03 09:00:00");
+        Date startDate = formatter.parse("2021-07-03 10:00:00");
         Date endDate = formatter.parse("2021-07-03 12:00:00");
-        List<Table> availableTables = availabilityService.findAvailableTables(COMPANY_ID, Optional.of(BUILDING_ID), Optional.of(ROOM_ID), startDate, endDate);
+        List<AvailabilityResponseDto> availabilityResponseDtos = availabilityService.findAvailableTables(COMPANY_ID, Optional.of(BUILDING_ID), Optional.of(ROOM_ID), startDate, endDate);
 
-        Assert.isTrue(availableTables.size() > 0, "not found available table");
+        Assert.isTrue(availabilityResponseDtos.size() > 0, "not found available table");
     }
 
 }

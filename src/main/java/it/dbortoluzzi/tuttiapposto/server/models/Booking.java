@@ -1,5 +1,6 @@
 package it.dbortoluzzi.tuttiapposto.server.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.cloud.firestore.annotation.DocumentId;
 import lombok.*;
 import org.apache.commons.lang3.time.DateUtils;
@@ -16,6 +17,7 @@ import java.util.List;
 public class Booking {
 
     @DocumentId
+    @JsonProperty("uID")
     private String uID;
     @NonNull
     private String userId;

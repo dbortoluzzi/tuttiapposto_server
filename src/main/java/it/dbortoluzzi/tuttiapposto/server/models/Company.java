@@ -1,5 +1,6 @@
 package it.dbortoluzzi.tuttiapposto.server.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.cloud.firestore.annotation.DocumentId;
 import lombok.*;
 
@@ -10,6 +11,7 @@ import lombok.*;
 public class Company {
 
     @DocumentId
+    @JsonProperty("uID")
     private String uID;
     private String vatNumber;
     @NonNull

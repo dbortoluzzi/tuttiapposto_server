@@ -1,5 +1,6 @@
 package it.dbortoluzzi.tuttiapposto.server.services;
 
+import it.dbortoluzzi.tuttiapposto.server.controllers.dto.AvailabilityResponseDto;
 import it.dbortoluzzi.tuttiapposto.server.models.*;
 import it.dbortoluzzi.tuttiapposto.server.repositories.*;
 import it.dbortoluzzi.tuttiapposto.server.utils.CommonQueriesBuilder;
@@ -33,7 +34,7 @@ public class AvailabilityService {
     @Autowired
     TableRepository tableRepository;
 
-    public List<Table> findAvailableTables(String companyId, Optional<String> buildingIdOpt, Optional<String> roomIdOpt, Date startDate, Date endDate) throws ExecutionException, InterruptedException {
+    public List<AvailabilityResponseDto> findAvailableTables(String companyId, Optional<String> buildingIdOpt, Optional<String> roomIdOpt, Date startDate, Date endDate) throws ExecutionException, InterruptedException {
         Optional<Company> companyOpt = companyRepository.get(companyId);
         Assert.isTrue(companyOpt.isPresent(), "company doesn't exist");
         Assert.isTrue(companyOpt.get().getActive(), "company is not active");
@@ -52,6 +53,8 @@ public class AvailabilityService {
             Assert.isTrue(roomOpt.isPresent(), "room doesn't exist");
             Assert.isTrue(roomOpt.get().getActive(), "room is not active");
         }
+
+        // TODO: add check on working days
 
         List<Booking> bookingsToCheck = new ArrayList<>();
         Date dateToSearch = DateUtils.truncate(startDate, Calendar.DATE);
@@ -87,24 +90,30 @@ public class AvailabilityService {
 
         Map<String, List<Booking>> bookingsByTables = existingBookings.stream().collect(groupingBy(Booking::getTableId));
 
-        List<String> tableAvailableAlreadyBooked = bookingsByTables.entrySet()
+        // get availability for table already booked
+        List<AvailabilityResponseDto> tableAvailableAlreadyBooked = bookingsByTables.entrySet()
                 .stream()
-                .filter(table -> {
-                    float newPercentage = (table.getValue().size() + 1) / (float) tableMap.get(table.getKey()).getMaxCapacity();
-                    return newPercentage <= company.getMaxCapacityPercentage();
+                .map(t -> {
+                    Table table = tableMap.get(t.getKey());
+                    Assert.isTrue(table != null, "table "+t.getKey()+" not found");
+                    Integer realCapacity = Table.computeRealCapacity(table, company);
+                    return new AvailabilityResponseDto(table, realCapacity - (t.getValue().size()), startDate, endDate);
                 })
-                .map(Map.Entry::getKey)
+                .filter(entry -> entry.getAvailability() >= 1)
                 .collect(Collectors.toList());
 
-        List<String> tableWithoutBookings = tableMap.entrySet()
+        // get availability for table without bookings
+        List<AvailabilityResponseDto> tableAvailableWithoutBookings = tableMap.entrySet()
                 .stream()
                 .filter(t -> !bookingsByTables.containsKey(t.getKey()))
-                .map(Map.Entry::getKey)
+                .map(Map.Entry::getValue)
+                .map(t -> new AvailabilityResponseDto(t, Table.computeRealCapacity(t, company), startDate, endDate))
                 .collect(Collectors.toList());
 
-        return tableMap.entrySet().stream()
-                .filter(el -> tableAvailableAlreadyBooked.contains(el.getKey()) || tableWithoutBookings.contains(el.getKey()))
-                .map(Map.Entry::getValue)
-                .collect(Collectors.toList());
+        List<AvailabilityResponseDto> availabilityResponseDtos = new ArrayList<>();
+        availabilityResponseDtos.addAll(tableAvailableAlreadyBooked);
+        availabilityResponseDtos.addAll(tableAvailableWithoutBookings);
+
+        return availabilityResponseDtos;
     }
 }

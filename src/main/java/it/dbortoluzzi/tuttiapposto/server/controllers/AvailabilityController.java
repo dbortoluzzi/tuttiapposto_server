@@ -1,6 +1,7 @@
 package it.dbortoluzzi.tuttiapposto.server.controllers;
 
 import it.dbortoluzzi.tuttiapposto.server.controllers.dto.AvailabilityRequestDto;
+import it.dbortoluzzi.tuttiapposto.server.controllers.dto.AvailabilityResponseDto;
 import it.dbortoluzzi.tuttiapposto.server.models.Table;
 import it.dbortoluzzi.tuttiapposto.server.services.AvailabilityService;
 import lombok.extern.slf4j.Slf4j;
@@ -16,15 +17,15 @@ import java.util.Optional;
 
 @Slf4j
 @RestController
-public class TableController {
+public class AvailabilityController {
 
     @Autowired
     AvailabilityService availabilityService;
 
-    @PostMapping("/api/tables/available")
+    @PostMapping("/api/available/tables")
     public ResponseEntity<Object> findAvailableTables(@RequestBody AvailabilityRequestDto availabilityRequestDto) {
         try {
-            List<Table> availableTables = availabilityService.findAvailableTables(
+            List<AvailabilityResponseDto> availableTables = availabilityService.findAvailableTables(
                     availabilityRequestDto.getCompanyId(),
                     Optional.ofNullable(availabilityRequestDto.getBuildingId()),
                     Optional.ofNullable(availabilityRequestDto.getRoomId()),
@@ -33,7 +34,7 @@ public class TableController {
             );
             return new ResponseEntity<>(availableTables, HttpStatus.OK);
         } catch (Exception e) {
-            log.error("Error searching availability for {}", availabilityRequestDto);
+            log.error("Error searching availability for {}", availabilityRequestDto, e);
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
