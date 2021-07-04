@@ -2,12 +2,8 @@ package it.dbortoluzzi.tuttiapposto.server.controllers.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
-import org.apache.commons.lang3.time.DateUtils;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Getter
 @Setter
@@ -18,9 +14,9 @@ public class AvailabilityRequestDto {
     private String companyId;
     private String buildingId;
     private String roomId;
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", locale = "it_IT")
     private Date startDate;
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", locale = "it_IT")
     private Date endDate;
 
     @Override

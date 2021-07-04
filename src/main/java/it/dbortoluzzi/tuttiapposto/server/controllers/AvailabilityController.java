@@ -25,6 +25,7 @@ public class AvailabilityController {
     @PostMapping("/api/available/tables")
     public ResponseEntity<Object> findAvailableTables(@RequestBody AvailabilityRequestDto availabilityRequestDto) {
         try {
+            log.info("Requesting availability for {}, {}", availabilityRequestDto.getStartDate(), availabilityRequestDto.getEndDate());
             List<AvailabilityResponseDto> availableTables = availabilityService.findAvailableTables(
                     availabilityRequestDto.getCompanyId(),
                     Optional.ofNullable(availabilityRequestDto.getBuildingId()),
