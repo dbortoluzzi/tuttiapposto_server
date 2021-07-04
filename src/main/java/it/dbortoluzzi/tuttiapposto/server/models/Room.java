@@ -1,5 +1,6 @@
 package it.dbortoluzzi.tuttiapposto.server.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.cloud.firestore.annotation.DocumentId;
 import lombok.*;
 
@@ -10,7 +11,8 @@ import lombok.*;
 public class Room {
 
     @DocumentId
-    private String id;
+    @JsonProperty("uID")
+    private String uID;
     @NonNull
     private String companyId;
     @NonNull
@@ -19,5 +21,4 @@ public class Room {
     @NonNull
     private String name;
     private String description;
-    private Integer maxCapacity;
 }

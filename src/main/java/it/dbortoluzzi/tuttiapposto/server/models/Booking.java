@@ -1,5 +1,6 @@
 package it.dbortoluzzi.tuttiapposto.server.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.cloud.firestore.annotation.DocumentId;
 import lombok.*;
 import org.apache.commons.lang3.time.DateUtils;
@@ -16,7 +17,8 @@ import java.util.List;
 public class Booking {
 
     @DocumentId
-    private String id;
+    @JsonProperty("uID")
+    private String uID;
     @NonNull
     private String userId;
     @NonNull
@@ -33,8 +35,8 @@ public class Booking {
     private Date endDate;
     private List<Date> days;
 
-    public Booking(String id, @NonNull String userId, @NonNull String companyId, @NonNull String buildingId, @NonNull String roomId, @NonNull String tableId, @NonNull Date startDate, @NonNull Date endDate) {
-        this.id = id;
+    public Booking(String uID, @NonNull String userId, @NonNull String companyId, @NonNull String buildingId, @NonNull String roomId, @NonNull String tableId, @NonNull Date startDate, @NonNull Date endDate) {
+        this.uID = uID;
         this.userId = userId;
         this.companyId = companyId;
         this.buildingId = buildingId;

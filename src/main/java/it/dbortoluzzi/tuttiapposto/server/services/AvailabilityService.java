@@ -1,18 +1,14 @@
 package it.dbortoluzzi.tuttiapposto.server.services;
 
-import com.google.cloud.Timestamp;
-import com.google.cloud.firestore.FieldPath;
-import com.google.cloud.firestore.Firestore;
+import it.dbortoluzzi.tuttiapposto.server.controllers.dto.AvailabilityResponseDto;
 import it.dbortoluzzi.tuttiapposto.server.models.*;
 import it.dbortoluzzi.tuttiapposto.server.repositories.*;
 import it.dbortoluzzi.tuttiapposto.server.utils.CommonQueriesBuilder;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -23,9 +19,6 @@ import static java.util.stream.Collectors.groupingBy;
 
 @Service
 public class AvailabilityService {
-    // TODO: remove
-    private static SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.ITALIAN);
-
     @Autowired
     BookingRepository bookingRepository;
 
@@ -41,7 +34,7 @@ public class AvailabilityService {
     @Autowired
     TableRepository tableRepository;
 
-    public List<Table> findAvailableTables(String companyId, Optional<String> buildingIdOpt, Optional<String> roomIdOpt, Date startDate, Date endDate) throws ExecutionException, InterruptedException {
+    public List<AvailabilityResponseDto> findAvailableTables(String companyId, Optional<String> buildingIdOpt, Optional<String> roomIdOpt, Date startDate, Date endDate) throws ExecutionException, InterruptedException {
         Optional<Company> companyOpt = companyRepository.get(companyId);
         Assert.isTrue(companyOpt.isPresent(), "company doesn't exist");
         Assert.isTrue(companyOpt.get().getActive(), "company is not active");
@@ -60,6 +53,8 @@ public class AvailabilityService {
             Assert.isTrue(roomOpt.isPresent(), "room doesn't exist");
             Assert.isTrue(roomOpt.get().getActive(), "room is not active");
         }
+
+        // TODO: add check on working days
 
         List<Booking> bookingsToCheck = new ArrayList<>();
         Date dateToSearch = DateUtils.truncate(startDate, Calendar.DATE);
@@ -91,28 +86,34 @@ public class AvailabilityService {
                     .active(true)
                 .buildQuery()))
                 .stream()
-                .collect(Collectors.toMap(Table::getId, Function.identity()));
+                .collect(Collectors.toMap(Table::getUID, Function.identity()));
 
         Map<String, List<Booking>> bookingsByTables = existingBookings.stream().collect(groupingBy(Booking::getTableId));
 
-        List<String> tableAvailableAlreadyBooked = bookingsByTables.entrySet()
+        // get availability for table already booked
+        List<AvailabilityResponseDto> tableAvailableAlreadyBooked = bookingsByTables.entrySet()
                 .stream()
-                .filter(table -> {
-                    float newPercentage = (table.getValue().size() + 1) / (float) tableMap.get(table.getKey()).getMaxCapacity();
-                    return newPercentage <= company.getMaxCapacityPercentage();
+                .map(t -> {
+                    Table table = tableMap.get(t.getKey());
+                    Assert.isTrue(table != null, "table "+t.getKey()+" not found");
+                    Integer realCapacity = Table.computeRealCapacity(table, company);
+                    return new AvailabilityResponseDto(table, realCapacity - (t.getValue().size()), startDate, endDate);
                 })
-                .map(Map.Entry::getKey)
+                .filter(entry -> entry.getAvailability() >= 1)
                 .collect(Collectors.toList());
 
-        List<String> tableWithoutBookings = tableMap.entrySet()
+        // get availability for table without bookings
+        List<AvailabilityResponseDto> tableAvailableWithoutBookings = tableMap.entrySet()
                 .stream()
                 .filter(t -> !bookingsByTables.containsKey(t.getKey()))
-                .map(Map.Entry::getKey)
+                .map(Map.Entry::getValue)
+                .map(t -> new AvailabilityResponseDto(t, Table.computeRealCapacity(t, company), startDate, endDate))
                 .collect(Collectors.toList());
 
-        return tableMap.entrySet().stream()
-                .filter(el -> tableAvailableAlreadyBooked.contains(el.getKey()) || tableWithoutBookings.contains(el.getKey()))
-                .map(Map.Entry::getValue)
-                .collect(Collectors.toList());
+        List<AvailabilityResponseDto> availabilityResponseDtos = new ArrayList<>();
+        availabilityResponseDtos.addAll(tableAvailableAlreadyBooked);
+        availabilityResponseDtos.addAll(tableAvailableWithoutBookings);
+
+        return availabilityResponseDtos;
     }
 }

@@ -49,7 +49,7 @@ public abstract class AbstractFirestoreRepository<T> {
             collectionReference.document(documentId).delete();
             return true;
         } catch (Exception e) {
-            log.error("Exception occurred while deleting document for {}", collectionName);
+            log.error("Exception occurred while deleting document for {}", collectionName, e);
         }
         return false;
     }
@@ -65,7 +65,7 @@ public abstract class AbstractFirestoreRepository<T> {
                     .collect(Collectors.toList());
 
         } catch (InterruptedException | ExecutionException e) {
-            log.error("Exception occurred while retrieving filtered document for {} with filters {}", collectionName, query);
+            log.error("Exception occurred while retrieving filtered document for {} with filters {}", collectionName, query, e);
             throw e;
         }
     }
@@ -88,7 +88,7 @@ public abstract class AbstractFirestoreRepository<T> {
                     .collect(Collectors.toList());
 
         } catch (InterruptedException | ExecutionException e) {
-            log.error("Exception occurred while retrieving filtered document for {}", collectionName);
+            log.error("Exception occurred while retrieving filtered document for {}", collectionName, e);
         }
         return Collections.<T>emptyList();
 
@@ -105,7 +105,7 @@ public abstract class AbstractFirestoreRepository<T> {
                     .collect(Collectors.toList());
 
         } catch (InterruptedException | ExecutionException e) {
-            log.error("Exception occurred while retrieving all document for {}", collectionName);
+            log.error("Exception occurred while retrieving all document for {}", collectionName, e);
             throw e;
         }
 

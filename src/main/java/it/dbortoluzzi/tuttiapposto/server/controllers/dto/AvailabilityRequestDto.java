@@ -13,7 +13,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AvailabilityRequest {
+public class AvailabilityRequestDto {
     @NonNull
     private String companyId;
     private String buildingId;
