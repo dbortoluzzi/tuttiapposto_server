@@ -14,9 +14,9 @@ public class AvailabilityRequestDto {
     private String companyId;
     private String buildingId;
     private String roomId;
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", locale = "it_IT")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private Date startDate;
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", locale = "it_IT")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private Date endDate;
 
     @Override
