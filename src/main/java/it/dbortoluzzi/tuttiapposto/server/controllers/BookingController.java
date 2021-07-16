@@ -44,12 +44,14 @@ public class BookingController {
     }
 
     @PostMapping("/api/bookings")
-    public ResponseEntity<String> createBooking(@RequestBody Booking booking) {
+    public ResponseEntity<Booking> createBooking(@RequestBody Booking booking) {
         if (isBookingAvailable(booking)) {
             Optional<String> save = bookingRepository.save(booking);
-            return save.map(value -> new ResponseEntity<>(value, HttpStatus.CREATED)).orElseGet(() -> new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
+            return save
+                    .map(value -> new ResponseEntity<>(new Booking(value, booking.getUserId(), booking.getCompanyId(), booking.getBuildingId(), booking.getRoomId(), booking.getTableId(), booking.getStartDate(), booking.getEndDate()), HttpStatus.CREATED))
+                    .orElseGet(() -> new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
         } else {
-            return new ResponseEntity<>("booking is not available", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
