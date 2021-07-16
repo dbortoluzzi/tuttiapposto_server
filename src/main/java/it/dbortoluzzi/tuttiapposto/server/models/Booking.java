@@ -56,4 +56,18 @@ public class Booking {
         }
         this.days = daysFound;
     }
+
+    @Override
+    public String toString() {
+        return "Booking{" +
+                "uID='" + uID + '\'' +
+                ", userId='" + userId + '\'' +
+                ", companyId='" + companyId + '\'' +
+                ", buildingId='" + buildingId + '\'' +
+                ", roomId='" + roomId + '\'' +
+                ", tableId='" + tableId + '\'' +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                '}';
+    }
 }

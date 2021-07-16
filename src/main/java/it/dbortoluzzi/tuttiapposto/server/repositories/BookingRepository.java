@@ -1,30 +1,30 @@
 package it.dbortoluzzi.tuttiapposto.server.repositories;
 
-import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.Firestore;
-import com.google.cloud.firestore.QueryDocumentSnapshot;
-import com.google.cloud.firestore.QuerySnapshot;
 import it.dbortoluzzi.tuttiapposto.server.models.Booking;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 @Repository
 @Slf4j
 public class BookingRepository extends AbstractFirestoreRepository<Booking> {
-    protected BookingRepository(Firestore firestore) {
+
+    private UserRepository userRepository;
+
+    public BookingRepository(Firestore firestore, UserRepository userRepository) {
         super(firestore, "Bookings");
+        this.userRepository = userRepository;
     }
 
     @Override
     public Optional<String> save(Booking model) {
-        model.rebuildDates();
-        return super.save(model);
+        if (userRepository.get(model.getUserId()).isPresent()) {
+            model.rebuildDates();
+            return super.save(model);
+        } else {
+            throw new IllegalStateException("no user valid");
+        }
     }
 }

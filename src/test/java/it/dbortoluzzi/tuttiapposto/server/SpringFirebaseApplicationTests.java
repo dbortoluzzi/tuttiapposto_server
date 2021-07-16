@@ -22,6 +22,8 @@ class SpringFirebaseApplicationTests {
 
     public static final String NEW_FAKE_COMPANY_ID = "NEW_FAKE_COMPANY_ID";
 
+    private static final String USER_ID = "Feyitm6eaoVmCqggutdRjhY2AKB3";
+
     private static final String COMPANY_ID = "FbF0or0c0NdBphbZcssm";
     private static final String BUILDING_ID = "VTdqvUGCKLWKq0SFkTHx";
     private static final String ROOM_ID = "B29tSJlDqC6J6OG9Jcug";
@@ -43,7 +45,7 @@ class SpringFirebaseApplicationTests {
 
         Date startDate = DateUtils.truncate(new Date(), Calendar.HOUR);
         Date endDate = DateUtils.addHours(startDate, 2);
-        Booking booking = new Booking(null, "FAKE_USER_ID", "FAKE_COMPANY_ID", "FAKE_BUILDING_ID", "FAKE_ROOM_ID", "FAKE_TABLE_ID", startDate, endDate);
+        Booking booking = new Booking(null, USER_ID, "FAKE_COMPANY_ID", "FAKE_BUILDING_ID", "FAKE_ROOM_ID", "FAKE_TABLE_ID", startDate, endDate);
         Optional<String> save = bookingRepository.save(booking);
 
         Assert.isTrue(save.isPresent(), "save booking is not present");

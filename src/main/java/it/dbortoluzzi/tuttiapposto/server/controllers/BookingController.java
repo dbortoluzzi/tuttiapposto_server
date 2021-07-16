@@ -1,7 +1,10 @@
 package it.dbortoluzzi.tuttiapposto.server.controllers;
 
+import it.dbortoluzzi.tuttiapposto.server.controllers.dto.AvailabilityResponseDto;
 import it.dbortoluzzi.tuttiapposto.server.models.Booking;
 import it.dbortoluzzi.tuttiapposto.server.repositories.BookingRepository;
+import it.dbortoluzzi.tuttiapposto.server.services.AvailabilityService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,10 +14,14 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@Slf4j
 public class BookingController {
 
     @Autowired
     BookingRepository bookingRepository;
+
+    @Autowired
+    AvailabilityService availabilityService;
 
     @GetMapping("/api/bookings")
     public ResponseEntity<List<Booking>> getAllBookings() {
@@ -23,6 +30,7 @@ public class BookingController {
             bookings = bookingRepository.findAll();
             return new ResponseEntity<>(bookings, HttpStatus.OK);
         } catch (Exception e) {
+            log.error("Error reading allBookings", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -36,20 +44,50 @@ public class BookingController {
     }
 
     @PostMapping("/api/bookings")
-    public ResponseEntity<String> saveBooking(@RequestBody Booking booking) {
-        Optional<String> save = bookingRepository.save(booking);
-        return save.map(value -> new ResponseEntity<>(value, HttpStatus.CREATED)).orElseGet(() -> new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
+    public ResponseEntity<String> createBooking(@RequestBody Booking booking) {
+        if (isBookingAvailable(booking)) {
+            Optional<String> save = bookingRepository.save(booking);
+            return save.map(value -> new ResponseEntity<>(value, HttpStatus.CREATED)).orElseGet(() -> new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
+        } else {
+            return new ResponseEntity<>("booking is not available", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping("/api/bookings/{id}")
+    // Attention: the booking argument must be different from saved element can be updated
     public ResponseEntity<String> updateBooking(@PathVariable("id") String id, @RequestBody Booking booking) {
-        booking.setUID(id);
-        Optional<String> update = bookingRepository.save(booking);
-        return update.map(value -> new ResponseEntity<>(value, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
+        Optional<Booking> optionalBooking = bookingRepository.get(id);
+        if (optionalBooking.isPresent()) {
+            if (isBookingAvailable(optionalBooking.get())) {
+                booking.setUID(id);
+                Optional<String> update = bookingRepository.save(booking);
+                return update.map(value -> new ResponseEntity<>(value, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
+            } else {
+                return new ResponseEntity<>("booking is not more available", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } else {
+            return new ResponseEntity<>("booking doesn't exists", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @DeleteMapping("/api/bookings/{id}")
     public ResponseEntity<Boolean> deleteBooking(@PathVariable("id") String id) {
         return new ResponseEntity<>(bookingRepository.delete(id), HttpStatus.OK);
+    }
+
+    private boolean isBookingAvailable(Booking booking) {
+        try {
+            List<AvailabilityResponseDto> availableTables = availabilityService.findAvailableTables(
+                    booking.getCompanyId(),
+                    Optional.of(booking.getBuildingId()),
+                    Optional.of(booking.getRoomId()),
+                    booking.getStartDate(),
+                    booking.getEndDate()
+            );
+            return availableTables.size() > 0;
+        } catch (Exception e) {
+            log.error("Availability error for booking {}", booking.toString(), e);
+            return false;
+        }
     }
 }
