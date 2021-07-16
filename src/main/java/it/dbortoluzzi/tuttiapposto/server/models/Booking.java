@@ -1,5 +1,6 @@
 package it.dbortoluzzi.tuttiapposto.server.models;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.cloud.firestore.annotation.DocumentId;
 import lombok.*;
@@ -29,8 +30,10 @@ public class Booking {
     private String roomId;
     @NonNull
     private String tableId;
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @NonNull
     private Date startDate;
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @NonNull
     private Date endDate;
     private List<Date> days;
