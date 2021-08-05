@@ -45,6 +45,7 @@ public class BookingController {
 
     @PostMapping("/api/bookings")
     public ResponseEntity<Booking> createBooking(@RequestBody Booking booking) {
+        log.info("Requesting booking for {}", booking);
         if (isBookingAvailable(booking)) {
             Optional<String> save = bookingRepository.save(booking);
             return save
