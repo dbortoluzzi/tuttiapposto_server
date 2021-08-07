@@ -1,9 +1,11 @@
 package it.dbortoluzzi.tuttiapposto.server.controllers;
 
 import it.dbortoluzzi.tuttiapposto.server.controllers.dto.AvailabilityResponseDto;
+import it.dbortoluzzi.tuttiapposto.server.controllers.dto.BookingRequestDto;
 import it.dbortoluzzi.tuttiapposto.server.models.Booking;
 import it.dbortoluzzi.tuttiapposto.server.repositories.BookingRepository;
 import it.dbortoluzzi.tuttiapposto.server.services.AvailabilityService;
+import it.dbortoluzzi.tuttiapposto.server.services.BookingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,6 +23,9 @@ public class BookingController {
     BookingRepository bookingRepository;
 
     @Autowired
+    BookingService bookingService;
+
+    @Autowired
     AvailabilityService availabilityService;
 
     @GetMapping("/api/bookings")
@@ -31,6 +36,24 @@ public class BookingController {
             return new ResponseEntity<>(bookings, HttpStatus.OK);
         } catch (Exception e) {
             log.error("Error reading allBookings", e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/api/bookings/filtered")
+    public ResponseEntity<List<Booking>> getBookings(@RequestBody BookingRequestDto bookingRequestDto) {
+        List<Booking> bookings = null;
+        try {
+            bookings = bookingService.getBookingsFiltered(
+                    bookingRequestDto.getCompanyId(),
+                    Optional.ofNullable(bookingRequestDto.getBuildingId()),
+                    Optional.ofNullable(bookingRequestDto.getRoomId()),
+                    bookingRequestDto.getStartDate(),
+                    bookingRequestDto.getEndDate()
+            );
+            return new ResponseEntity<>(bookings, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Error reading getBookings", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

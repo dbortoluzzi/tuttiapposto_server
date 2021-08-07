@@ -23,6 +23,9 @@ public class AvailabilityService {
     BookingRepository bookingRepository;
 
     @Autowired
+    BookingService bookingService;
+
+    @Autowired
     CompanyRepository companyRepository;
 
     @Autowired
@@ -37,41 +40,9 @@ public class AvailabilityService {
     public List<AvailabilityResponseDto> findAvailableTables(String companyId, Optional<String> buildingIdOpt, Optional<String> roomIdOpt, Date startDate, Date endDate) throws ExecutionException, InterruptedException {
         Optional<Company> companyOpt = companyRepository.get(companyId);
         Assert.isTrue(companyOpt.isPresent(), "company doesn't exist");
-        Assert.isTrue(companyOpt.get().getActive(), "company is not active");
         Company company = companyOpt.get();
-
-        Optional<Building> buildingOpt = Optional.empty();
-        if (buildingIdOpt.isPresent()) {
-            buildingOpt = buildingRepository.get(buildingIdOpt.get());
-            Assert.isTrue(buildingOpt.isPresent(), "building doesn't exist");
-            Assert.isTrue(buildingOpt.get().getActive(), "building is not active");
-        }
-
-        Optional<Room> roomOpt = Optional.empty();
-        if (roomIdOpt.isPresent()) {
-            roomOpt = roomRepository.get(roomIdOpt.get());
-            Assert.isTrue(roomOpt.isPresent(), "room doesn't exist");
-            Assert.isTrue(roomOpt.get().getActive(), "room is not active");
-        }
-
-        // TODO: add check on working days
-
-        List<Booking> bookingsToCheck = new ArrayList<>();
-        Date dateToSearch = DateUtils.truncate(startDate, Calendar.DATE);
-        Date endDateTruncated = DateUtils.addDays(DateUtils.truncate(endDate, Calendar.DATE), 1);
-        while (dateToSearch.before(endDateTruncated)) {
-            bookingsToCheck.addAll(bookingRepository.findByQuery(
-                    CommonQueriesBuilder
-                            .newBuilder(bookingRepository.collectionReference)
-                            .company(companyId)
-                            .building(buildingIdOpt)
-                            .room(roomIdOpt)
-                            .buildQuery()
-                            .whereArrayContains("days", dateToSearch)
-                    )
-            );
-            dateToSearch = DateUtils.addDays(dateToSearch, 1);
-        }
+        Assert.isTrue(company.getActive(), "company is not active");
+        List<Booking> bookingsToCheck = bookingService.getBookingsBy(companyId, buildingIdOpt, roomIdOpt, startDate, endDate);
 
         List<Booking> existingBookings = bookingsToCheck
                 .stream()
