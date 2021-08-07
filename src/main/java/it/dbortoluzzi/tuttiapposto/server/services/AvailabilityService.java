@@ -43,7 +43,7 @@ public class AvailabilityService {
         Company company = companyOpt.get();
         Assert.isTrue(company.getActive(), "company is not active");
         List<Booking> bookingsToCheck = bookingService.getBookingsBy(companyId, buildingIdOpt, roomIdOpt, startDate, endDate);
-        Assert.isTrue(new Date().before(endDate) || new Date().equals(endDate), "endDate after now");
+//        Assert.isTrue(new Date().before(endDate) || new Date().equals(endDate), "endDate after now");
 
         List<Booking> existingBookings = bookingsToCheck
                 .stream()
