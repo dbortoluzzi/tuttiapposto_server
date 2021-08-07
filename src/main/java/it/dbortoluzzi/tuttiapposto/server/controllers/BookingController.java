@@ -42,6 +42,7 @@ public class BookingController {
 
     @PostMapping("/api/bookings/filtered")
     public ResponseEntity<List<Booking>> getBookings(@RequestBody BookingRequestDto bookingRequestDto) {
+        log.info("Get bookings for {}", bookingRequestDto);
         List<Booking> bookings = null;
         try {
             bookings = bookingService.getBookingsFiltered(
