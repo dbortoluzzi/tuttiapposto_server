@@ -4,6 +4,7 @@ import com.google.cloud.firestore.Firestore;
 import it.dbortoluzzi.tuttiapposto.server.models.Booking;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.Assert;
 
 import java.util.Date;
 import java.util.List;
@@ -22,6 +23,7 @@ public class BookingRepository extends AbstractFirestoreRepository<Booking> {
 
     @Override
     public Optional<String> save(Booking model) {
+        Assert.isTrue(new Date().after(model.getEndDate()) || new Date().equals(model.getEndDate()), "endDate before now");
         if (userRepository.get(model.getUserId()).isPresent()) {
             model.rebuildDates();
             return super.save(model);
