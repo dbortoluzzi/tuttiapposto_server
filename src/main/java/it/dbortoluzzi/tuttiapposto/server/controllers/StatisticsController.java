@@ -21,7 +21,7 @@ public class StatisticsController {
     @Autowired
     StatisticsService statisticsService;
 
-    @PostMapping("/api/statistics/getOccupationStatsPerHour")
+    @PostMapping("/api/statistics/occupationStatsPerHour")
     public ResponseEntity<Object> occupationStatsPerHour(@RequestBody OccupationRequestDto occupationRequestDto) {
         try {
             log.info("Requesting occupationStatsPerHour for {}, {}", occupationRequestDto.getStartDate(), occupationRequestDto.getEndDate());
@@ -37,7 +37,7 @@ public class StatisticsController {
         }
     }
 
-    @PostMapping("/api/statistics/getOccupationStatsPerRoom")
+    @PostMapping("/api/statistics/occupationStatsPerRoom")
     public ResponseEntity<Object> getOccupationStatsPerRoom(@RequestBody OccupationRequestDto occupationRequestDto) {
         try {
             log.info("Requesting getOccupationStatsPerRoom for {}, {}", occupationRequestDto.getStartDate(), occupationRequestDto.getEndDate());

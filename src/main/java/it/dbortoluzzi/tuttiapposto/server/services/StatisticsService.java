@@ -75,7 +75,11 @@ public class StatisticsService {
                 .collect(groupingBy(
                         Function.identity(), Collectors.counting()
                 ));
-        return roomMap.entrySet().stream().map(e -> new OccupationByElementResponseDto(e.getKey(), e.getValue())).collect(Collectors.toList());
+        return roomMap.entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .map(e -> new OccupationByElementResponseDto(e.getKey(), e.getValue()))
+                .collect(Collectors.toList());
     }
 
     private List<Date> findHoursBetween(Date startDate, Date endDate) {
