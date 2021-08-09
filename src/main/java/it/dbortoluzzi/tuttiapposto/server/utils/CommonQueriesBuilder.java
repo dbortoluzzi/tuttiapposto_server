@@ -17,6 +17,11 @@ public class CommonQueriesBuilder {
         return new CommonQueriesBuilder(query);
     }
 
+    public CommonQueriesBuilder id(String id) {
+        query = query.whereEqualTo("uID", id);
+        return this;
+    }
+
     public CommonQueriesBuilder company(String companyId) {
         query = query.whereEqualTo("companyId", companyId);
         return this;

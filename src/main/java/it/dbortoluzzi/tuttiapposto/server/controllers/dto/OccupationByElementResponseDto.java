@@ -14,12 +14,14 @@ public class OccupationByElementResponseDto {
     private String elementId;
     @NonNull
     private Long occupation;
+    private Double occupationPercent;
 
     @Override
     public String toString() {
         return "OccupationByElementResponseDto{" +
                 "elementId='" + elementId + '\'' +
                 ", occupation=" + occupation +
+                ", occupationPercent=" + occupationPercent +
                 '}';
     }
 }

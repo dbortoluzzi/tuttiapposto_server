@@ -5,6 +5,7 @@ import it.dbortoluzzi.tuttiapposto.server.controllers.dto.OccupationByElementRes
 import it.dbortoluzzi.tuttiapposto.server.models.Booking;
 import it.dbortoluzzi.tuttiapposto.server.models.Company;
 import it.dbortoluzzi.tuttiapposto.server.repositories.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.groupingBy;
 
 @Service
+@Slf4j
 public class StatisticsService {
     @Autowired
     BookingRepository bookingRepository;
@@ -78,7 +80,16 @@ public class StatisticsService {
         return roomMap.entrySet()
                 .stream()
                 .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-                .map(e -> new OccupationByElementResponseDto(e.getKey(), e.getValue()))
+                .map(e -> {
+                    Double roomOccupation = Double.MAX_VALUE;
+                    try {
+                        Integer maxCapacityOf = tableRepository.maxCapacityOf(e.getKey());
+                        roomOccupation = e.getValue()/(double)maxCapacityOf;
+                    } catch (Exception ex) {
+                        log.error("error retrieving maxCapacityOf room with id = {}", e.getKey());
+                    }
+                    return new OccupationByElementResponseDto(e.getKey(), e.getValue(), roomOccupation);
+                })
                 .collect(Collectors.toList());
     }
 
