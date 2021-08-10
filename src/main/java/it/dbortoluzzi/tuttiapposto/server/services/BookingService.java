@@ -74,22 +74,25 @@ public class BookingService {
                 );
                 dateToSearch = DateUtils.addDays(dateToSearch, 1);
             }
-
-            return bookingsToCheck
-                    .stream()
-                    .filter(b -> (b.getStartDate().before(endDate) || b.getStartDate().equals(endDate)) && (startDate.before(b.getEndDate()) || startDate.equals(b.getEndDate())))
-                    .collect(Collectors.toList());
         } else {
-            return bookingRepository.findByQuery(
+            bookingsToCheck.addAll(bookingRepository.findByQuery(
                     CommonQueriesBuilder
                             .newBuilder(bookingRepository.collectionReference)
                             .company(companyId)
                             .building(buildingIdOpt)
                             .room(roomIdOpt)
                             .buildQuery()
-                            .whereGreaterThanOrEqualTo("startDate", startDate)
+                            .whereGreaterThanOrEqualTo("startDate", dateToSearch)
                             .orderBy("startDate", Query.Direction.ASCENDING)
-            );
+            ));
+        }
+        if (bookingsToCheck.isEmpty()) {
+            return bookingsToCheck;
+        } else {
+            return bookingsToCheck
+                    .stream()
+                    .filter(b -> (endDate == null || b.getStartDate().before(endDate) || b.getStartDate().equals(endDate)) && (startDate.before(b.getEndDate()) || startDate.equals(b.getEndDate())))
+                    .collect(Collectors.toList());
         }
     }
 }
