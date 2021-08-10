@@ -82,6 +82,6 @@ public class AvailabilityService {
         availabilityResponseDtos.addAll(tableAvailableAlreadyBooked);
         availabilityResponseDtos.addAll(tableAvailableWithoutBookings);
 
-        return availabilityResponseDtos;
+        return availabilityResponseDtos.stream().sorted(Comparator.comparingInt(AvailabilityResponseDto::getAvailability).reversed()).collect(Collectors.toList());
     }
 }
