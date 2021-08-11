@@ -31,7 +31,8 @@ public class AvailabilityController {
                     Optional.ofNullable(availabilityRequestDto.getBuildingId()),
                     Optional.ofNullable(availabilityRequestDto.getRoomId()),
                     availabilityRequestDto.getStartDate(),
-                    availabilityRequestDto.getEndDate()
+                    availabilityRequestDto.getEndDate(),
+                    Optional.ofNullable(availabilityRequestDto.getUserId())
             );
             return new ResponseEntity<>(availableTables, HttpStatus.OK);
         } catch (Exception e) {

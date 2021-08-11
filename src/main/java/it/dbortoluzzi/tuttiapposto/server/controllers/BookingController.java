@@ -109,7 +109,8 @@ public class BookingController {
                     Optional.of(booking.getBuildingId()),
                     Optional.of(booking.getRoomId()),
                     booking.getStartDate(),
-                    booking.getEndDate()
+                    booking.getEndDate(),
+                    Optional.empty()
             );
             return availableTables.size() > 0;
         } catch (Exception e) {
