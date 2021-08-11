@@ -70,9 +70,10 @@ class SpringFirebaseApplicationTests {
 
     @Test
     void getAvailability() throws ExecutionException, InterruptedException, ParseException {
-        Date startDate = formatter.parse("2021-07-04 12:35:00");
-        Date endDate = formatter.parse("2021-07-04 12:36:00");
-        List<AvailabilityResponseDto> availabilityResponseDtos = availabilityService.findAvailableTables(COMPANY_ID, Optional.of(BUILDING_ID), Optional.of(ROOM_ID), startDate, endDate);
+        // TODO: refactor dates
+        Date startDate = formatter.parse("2022-07-04 12:35:00");
+        Date endDate = formatter.parse("2022-07-04 12:36:00");
+        List<AvailabilityResponseDto> availabilityResponseDtos = availabilityService.findAvailableTables(COMPANY_ID, Optional.of(BUILDING_ID), Optional.of(ROOM_ID), startDate, endDate, Optional.empty());
 
         Assert.isTrue(availabilityResponseDtos.size() > 0, "not found available table");
     }

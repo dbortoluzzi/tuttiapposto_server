@@ -4,6 +4,7 @@ import it.dbortoluzzi.tuttiapposto.server.controllers.dto.AvailabilityResponseDt
 import it.dbortoluzzi.tuttiapposto.server.models.*;
 import it.dbortoluzzi.tuttiapposto.server.repositories.*;
 import it.dbortoluzzi.tuttiapposto.server.utils.CommonQueriesBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,10 @@ public class AvailabilityService {
     @Autowired
     TableRepository tableRepository;
 
-    public List<AvailabilityResponseDto> findAvailableTables(String companyId, Optional<String> buildingIdOpt, Optional<String> roomIdOpt, Date startDate, Date endDate) throws ExecutionException, InterruptedException {
+    @Autowired
+    AvailabilityReportRepository availabilityReportRepository;
+
+    public List<AvailabilityResponseDto> findAvailableTables(String companyId, Optional<String> buildingIdOpt, Optional<String> roomIdOpt, Date startDate, Date endDate, Optional<String> userIdOpt) throws ExecutionException, InterruptedException {
         Optional<Company> companyOpt = companyRepository.get(companyId);
         Assert.isTrue(companyOpt.isPresent(), "company doesn't exist");
         Company company = companyOpt.get();
@@ -56,6 +60,7 @@ public class AvailabilityService {
                 .stream()
                 .collect(Collectors.toMap(Table::getUID, Function.identity()));
 
+        final Map<String, List<AvailabilityReport>> mapAvailabilityReportByTableId = availabilityReportRepository.getAvailabilityReportByTableId(companyId, startDate, endDate);
         Map<String, List<Booking>> bookingsByTables = existingBookings.stream().collect(groupingBy(Booking::getTableId));
 
         // get availability for table already booked
@@ -65,7 +70,9 @@ public class AvailabilityService {
                     Table table = tableMap.get(t.getKey());
                     Assert.isTrue(table != null, "table "+t.getKey()+" not found");
                     Integer realCapacity = Table.computeRealCapacity(table, company);
-                    return new AvailabilityResponseDto(table, realCapacity - (t.getValue().size()), startDate, endDate);
+                    List<AvailabilityReport> availabilityReports = extractAvailabilityReportsByTableId(mapAvailabilityReportByTableId, table);
+                    boolean alreadyReportedByUser = isAlreadyReportedByUser(userIdOpt, availabilityReports);
+                    return new AvailabilityResponseDto(table, realCapacity - (t.getValue().size()), startDate, endDate, availabilityReports.size()>0, alreadyReportedByUser);
                 })
                 .filter(entry -> entry.getAvailability() >= 1)
                 .collect(Collectors.toList());
@@ -75,7 +82,11 @@ public class AvailabilityService {
                 .stream()
                 .filter(t -> !bookingsByTables.containsKey(t.getKey()))
                 .map(Map.Entry::getValue)
-                .map(t -> new AvailabilityResponseDto(t, Table.computeRealCapacity(t, company), startDate, endDate))
+                .map(t -> {
+                    List<AvailabilityReport> availabilityReports = extractAvailabilityReportsByTableId(mapAvailabilityReportByTableId, t);
+                    boolean alreadyReportedByUser = isAlreadyReportedByUser(userIdOpt, availabilityReports);
+                    return new AvailabilityResponseDto(t, Table.computeRealCapacity(t, company), startDate, endDate, availabilityReports.size()>0, alreadyReportedByUser);
+                })
                 .collect(Collectors.toList());
 
         List<AvailabilityResponseDto> availabilityResponseDtos = new ArrayList<>();
@@ -83,5 +94,13 @@ public class AvailabilityService {
         availabilityResponseDtos.addAll(tableAvailableWithoutBookings);
 
         return availabilityResponseDtos.stream().sorted(Comparator.comparingInt(AvailabilityResponseDto::getAvailability).reversed()).collect(Collectors.toList());
+    }
+
+    private List<AvailabilityReport> extractAvailabilityReportsByTableId(Map<String, List<AvailabilityReport>> mapAvailabilityReportByTableId, Table t) {
+        return mapAvailabilityReportByTableId.getOrDefault(t.getUID(), new ArrayList<>());
+    }
+
+    private boolean isAlreadyReportedByUser(Optional<String> userIdOpt, List<AvailabilityReport> availabilityReports) {
+        return availabilityReports.stream().anyMatch(a -> a.getUserId().equals(userIdOpt.orElse("UNKNOWN")));
     }
 }
