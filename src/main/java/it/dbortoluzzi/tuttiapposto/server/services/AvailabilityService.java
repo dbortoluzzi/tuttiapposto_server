@@ -69,10 +69,7 @@ public class AvailabilityService {
                 .map(t -> {
                     Table table = tableMap.get(t.getKey());
                     Assert.isTrue(table != null, "table "+t.getKey()+" not found");
-                    Integer realCapacity = Table.computeRealCapacity(table, company);
-                    List<AvailabilityReport> availabilityReports = extractAvailabilityReportsByTableId(mapAvailabilityReportByTableId, table);
-                    boolean alreadyReportedByUser = isAlreadyReportedByUser(userIdOpt, availabilityReports);
-                    return new AvailabilityResponseDto(table, realCapacity - (t.getValue().size()), startDate, endDate, availabilityReports.size()>0, alreadyReportedByUser);
+                    return createAvailabilityResponseDto(startDate, endDate, userIdOpt, mapAvailabilityReportByTableId, table, Table.computeRealCapacity(table, company) - (t.getValue().size()));
                 })
                 .filter(entry -> entry.getAvailability() >= 1)
                 .collect(Collectors.toList());
@@ -82,11 +79,7 @@ public class AvailabilityService {
                 .stream()
                 .filter(t -> !bookingsByTables.containsKey(t.getKey()))
                 .map(Map.Entry::getValue)
-                .map(t -> {
-                    List<AvailabilityReport> availabilityReports = extractAvailabilityReportsByTableId(mapAvailabilityReportByTableId, t);
-                    boolean alreadyReportedByUser = isAlreadyReportedByUser(userIdOpt, availabilityReports);
-                    return new AvailabilityResponseDto(t, Table.computeRealCapacity(t, company), startDate, endDate, availabilityReports.size()>0, alreadyReportedByUser);
-                })
+                .map(t -> createAvailabilityResponseDto(startDate, endDate, userIdOpt, mapAvailabilityReportByTableId, t, Table.computeRealCapacity(t, company)))
                 .collect(Collectors.toList());
 
         List<AvailabilityResponseDto> availabilityResponseDtos = new ArrayList<>();
@@ -94,6 +87,12 @@ public class AvailabilityService {
         availabilityResponseDtos.addAll(tableAvailableWithoutBookings);
 
         return availabilityResponseDtos.stream().sorted(Comparator.comparingInt(AvailabilityResponseDto::getAvailability).reversed()).collect(Collectors.toList());
+    }
+
+    private AvailabilityResponseDto createAvailabilityResponseDto(Date startDate, Date endDate, Optional<String> userIdOpt, Map<String, List<AvailabilityReport>> mapAvailabilityReportByTableId, Table table, int avalability) {
+        List<AvailabilityReport> availabilityReports = extractAvailabilityReportsByTableId(mapAvailabilityReportByTableId, table);
+        boolean alreadyReportedByUser = isAlreadyReportedByUser(userIdOpt, availabilityReports);
+        return new AvailabilityResponseDto(table, avalability, startDate, endDate, availabilityReports.size() > 0, alreadyReportedByUser);
     }
 
     private List<AvailabilityReport> extractAvailabilityReportsByTableId(Map<String, List<AvailabilityReport>> mapAvailabilityReportByTableId, Table t) {
