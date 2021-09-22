@@ -7,6 +7,7 @@ import it.dbortoluzzi.tuttiapposto.server.models.Company;
 import it.dbortoluzzi.tuttiapposto.server.models.Room;
 import it.dbortoluzzi.tuttiapposto.server.repositories.*;
 import it.dbortoluzzi.tuttiapposto.server.utils.CommonQueriesBuilder;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class BookingService {
     @Autowired
     BookingRepository bookingRepository;
@@ -41,6 +43,8 @@ public class BookingService {
         Optional<Company> companyOpt = companyRepository.get(companyId);
         Assert.isTrue(companyOpt.isPresent(), "company doesn't exist");
         Assert.isTrue(companyOpt.get().getActive(), "company is not active");
+
+        log.info("Checking for userId: {}", userIdOpt.orElse("UNKNOWN"));
 
         Optional<Building> buildingOpt = Optional.empty();
         if (buildingIdOpt.isPresent()) {
