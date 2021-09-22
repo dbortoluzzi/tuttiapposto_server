@@ -33,11 +33,11 @@ public class BookingService {
     @Autowired
     TableRepository tableRepository;
 
-    public List<Booking> getBookingsFiltered(String companyId, Optional<String> buildingIdOpt, Optional<String> roomIdOpt, Date startDate, Date endDate) throws ExecutionException, InterruptedException {
-        return getBookingsBy(companyId, buildingIdOpt, roomIdOpt, startDate, endDate);
+    public List<Booking> getBookingsFiltered(String companyId, Optional<String> buildingIdOpt, Optional<String> roomIdOpt, Optional<String> userIdOpt, Date startDate, Date endDate) throws ExecutionException, InterruptedException {
+        return getBookingsBy(companyId, buildingIdOpt, roomIdOpt, userIdOpt, startDate, endDate);
     }
 
-    protected List<Booking> getBookingsBy(String companyId, Optional<String> buildingIdOpt, Optional<String> roomIdOpt, Date startDate, Date endDate) throws ExecutionException, InterruptedException {
+    protected List<Booking> getBookingsBy(String companyId, Optional<String> buildingIdOpt, Optional<String> roomIdOpt, Optional<String> userIdOpt, Date startDate, Date endDate) throws ExecutionException, InterruptedException {
         Optional<Company> companyOpt = companyRepository.get(companyId);
         Assert.isTrue(companyOpt.isPresent(), "company doesn't exist");
         Assert.isTrue(companyOpt.get().getActive(), "company is not active");
@@ -67,6 +67,7 @@ public class BookingService {
                                 .company(companyId)
                                 .building(buildingIdOpt)
                                 .room(roomIdOpt)
+                                .user(userIdOpt)
                                 .buildQuery()
                                 .whereArrayContains("days", dateToSearch)
                                 .orderBy("startDate", Query.Direction.ASCENDING)

@@ -45,7 +45,7 @@ public class StatisticsService {
         Assert.isTrue(company.getActive(), "company is not active");
 
         List<OccupationByDateResponseDto> occupationByDateResponseDtoList = new ArrayList<>();
-        List<Booking> bookings = bookingService.getBookingsBy(companyId, Optional.empty(), Optional.empty(), startDate, endDate);
+        List<Booking> bookings = bookingService.getBookingsBy(companyId, Optional.empty(), Optional.empty(), Optional.empty(), startDate, endDate);
         List<Date> hoursBetween = findHoursBetween(startDate, endDate).stream().sorted().collect(Collectors.toList());
         Map<String, List<Date>> hourOccupationMap = bookings.stream()
                 .map(b -> findHoursBetween(b.getStartDate(), b.getEndDate()))
@@ -71,7 +71,7 @@ public class StatisticsService {
         Assert.isTrue(company.getActive(), "company is not active");
 
         List<OccupationByElementResponseDto> occupationByDateResponseDtoList = new ArrayList<>();
-        List<Booking> bookings = bookingService.getBookingsBy(companyId, Optional.empty(), Optional.empty(), startDate, endDate);
+        List<Booking> bookings = bookingService.getBookingsBy(companyId, Optional.empty(), Optional.empty(), Optional.empty(), startDate, endDate);
         Map<String, Long> roomMap = bookings.stream()
                 .map(Booking::getRoomId)
                 .collect(groupingBy(

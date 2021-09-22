@@ -62,6 +62,11 @@ public class CommonQueriesBuilder {
         return this;
     }
 
+    public CommonQueriesBuilder user(Optional<String> userIdOpt) {
+        userIdOpt.ifPresent(s -> query = query.whereEqualTo("userId", s));
+        return this;
+    }
+
     public Query buildQuery() {
         return query;
     }

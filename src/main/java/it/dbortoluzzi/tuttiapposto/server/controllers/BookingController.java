@@ -49,6 +49,7 @@ public class BookingController {
                     bookingRequestDto.getCompanyId(),
                     Optional.ofNullable(bookingRequestDto.getBuildingId()),
                     Optional.ofNullable(bookingRequestDto.getRoomId()),
+                    Optional.ofNullable(bookingRequestDto.getUserId()),
                     bookingRequestDto.getStartDate(),
                     bookingRequestDto.getEndDate()
             );
