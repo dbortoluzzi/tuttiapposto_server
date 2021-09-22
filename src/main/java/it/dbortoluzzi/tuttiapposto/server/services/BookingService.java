@@ -44,8 +44,6 @@ public class BookingService {
         Assert.isTrue(companyOpt.isPresent(), "company doesn't exist");
         Assert.isTrue(companyOpt.get().getActive(), "company is not active");
 
-        log.info("Checking for userId: {}", userIdOpt.orElse("UNKNOWN"));
-
         Optional<Building> buildingOpt = Optional.empty();
         if (buildingIdOpt.isPresent()) {
             buildingOpt = buildingRepository.get(buildingIdOpt.get());
@@ -86,6 +84,7 @@ public class BookingService {
                             .company(companyId)
                             .building(buildingIdOpt)
                             .room(roomIdOpt)
+                            .user(userIdOpt)
                             .buildQuery()
                             .whereGreaterThanOrEqualTo("startDate", dateToSearch)
                             .orderBy("startDate", Query.Direction.ASCENDING)
